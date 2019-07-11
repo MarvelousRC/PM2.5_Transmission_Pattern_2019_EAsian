@@ -10,27 +10,27 @@
 ## 数据获取  ![Progress](http://progressed.io/bar/5)  
 试验[ 7月11日 ]
 
-+ [ ] 区域确定，出shapefile
-+ [ ] 监测站：pm2.5
++ [ ] 区域确定，出shapefile [全体]
++ [ ] 监测站：pm2.5 [李/杨]
 + 陆地海洋卫星遥感数据获取
-  + [ ] GOCI data
-  + [ ] MOD09
-+ [ ] 气象数据：T, P, 风速, (RH)
-+ [ ] 自然数据：NDVI, DEM
-+ [ ] AERONET
+  + [ ] GOCI data [孙]
+  + [ ] MOD09 [杨]
++ [ ] 气象数据：T, P, 风速, (RH) [陈/杨]
++ [ ] 自然数据：NDVI, DEM [杨]
++ [ ] AERONET [杨]
 
 ## 数据预处理  ![Progress](http://progressed.io/bar/5)
-试验[ 7月11日 ]
-所有数据范围与投影坐标信息统一：
+试验[ 7月11日 ]<br>
+所有数据产品的范围与投影坐标信息统一：
 
 
 + AOD **[ 7.11 ]**
-  + [ ] 反演算法DB=> AOD，裁掉海洋，和AERONET进行回归分析和校正
-  + [ ] 海洋：通过GOCI的AOT产品结果，与陆地进行拼接
-+ 空间全域插值气象数据T, P, 风速, (RH)
-  + [ ] ArcGIS/QGIS批处理
+  + [ ] 反演算法DB=> AOD，裁掉海洋，和AERONET进行回归分析和校正 [李]
+  + [ ] 海洋：通过GOCI的AOT产品结果，与陆地进行拼接 [孙/杨]
++ 空间全域插值气象数据T, P, 风速, (RH) 
+  + [ ] ArcGIS/QGIS批处理 [陈/杨]
 + 空间连接（陆地）
-  + [ ] 把所有自变量空间关联到PM2.5观测点
+  + [ ] 把所有自变量空间关联到PM2.5站点 [李/孙]
 
 ## 建模  ![Progress](http://progressed.io/bar/5)
 $C_{pm2.5} = f(AOD, climate, geography)$
@@ -44,18 +44,18 @@ PM2.5 (地面站点 Monitored on the ground)
 - [ ] 基于Python的机器学习的PM2.5反演试验模型预计在7月15日出现雏形
 
 * PM2.5反演模型
-  * [ ] 回归（陆地）
+  * 回归（陆地）
     * 方法：Statictical [LR, **GWR**], Machine Learning [Random Forest, SVR…]
-      * [mGWR](https://github.com/pysal/mgwr)
-      * 对于统计回归模型
+      * [ ] [mGWR](https://github.com/pysal/mgwr) [???]
+      * [ ] 对于统计回归模型 [陈/孙]
         * 数据预处理
         * 线性回归需要分析整体模型的线性显著性（F test）
         * 多重共线性检验
         * 需要对变量进行回归关系的显著性检验（t test） 
-      * 对于机器学习回归模型
+      * [ ] 对于机器学习回归模型 [???]
         * [标准化数据](https://docs.microsoft.com/en-us/azure/machine-learning/studio-module-reference/normalize-data)（有些模型要求这么做，另外就是放在统一尺度能够使算法更加高效）
         * Random Forest [Python](https://towardsdatascience.com/random-forest-in-python-24d0893d51c0)
-  * [ ] 回归（海洋）
+  * [ ] 回归（海洋）[???]
     * NDVI这项改为primary production，其余不变
 
 ## 模型验证与预测  ![Progress](http://progressed.io/bar/5)
