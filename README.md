@@ -10,7 +10,7 @@
 ## 数据获取  ![Progress](http://progressed.io/bar/5)  
 试验[ 7月11日 ]
 
-+ [ ] 区域确定，出shapefile [全体]
++ [x] 区域确定，出shapefile [全体]
 + [ ] 监测站：pm2.5 [李/杨]
 + 陆地海洋卫星遥感数据获取
   + [ ] GOCI data [孙]
@@ -21,7 +21,7 @@
 
 ## 数据预处理  ![Progress](http://progressed.io/bar/5)
 试验[ 7月11日 ]<br>
-所有数据产品的范围与投影坐标信息统一：
+所有数据产品的范围、投影坐标信息、尺度分辨率统一：
 
 
 + AOD **[ 7.11 ]**
