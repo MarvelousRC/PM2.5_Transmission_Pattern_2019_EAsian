@@ -199,6 +199,7 @@ def Fast_interpolate(aod, data):
     """Interpolate the mask area -> 0.0"""
     row, col = aod.shape[0], aod.shape[1]
     for idi, i in enumerate(aod):
+        # print('interpolate', idi)
         for idj, j in enumerate(i):
             if data[idi][idj] == 0.0:
                 # assign range
@@ -224,18 +225,18 @@ def Fast_interpolate(aod, data):
                 tot = 0
                 for t in range(idj-x, idj+x+1):
                     if idi - x >= 0 and idi + x < row and 0 <= t < col:
-                        if aod[idi + x][t] >= 0.0:
+                        if aod[idi + x][t] > 0.0:
                             tot += aod[idi + x][t]
                             cnt += 1
-                        if aod[idi - x][t] >= 0.0:
+                        if aod[idi - x][t] > 0.0:
                             tot += aod[idi - x][t]
                             cnt += 1
                 for t in range(idi-x+1, idi+x):
                     if 0 <= t < row and idj - x >= 0 and idj + x < col:
-                        if aod[t][idj - x] >= 0.0:
+                        if aod[t][idj - x] > 0.0:
                             tot += aod[t][idj - x]
                             cnt += 1
-                        if aod[t][idj + x] >= 0.0:
+                        if aod[t][idj + x] > 0.0:
                             tot += aod[t][idj + x]
                             cnt += 1
                 if cnt == 0:
