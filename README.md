@@ -7,19 +7,19 @@
 > 研究时间：2019年2月底到3月中旬，短时间内密集采样[初步]
 
 项目组成员：陈玮烨、孙克染、李岸洲、杨清杰
-## 数据获取  ![Progress](http://progressed.io/bar/5)  
+## 数据获取  ![Progress](http://progressed.io/bar/75)
 试验[ 7月11日 ]
 
 + [x] 区域确定，出shapefile [全体]
-+ [ ] 监测站：pm2.5 [李/杨]
++ [x] 监测站：pm2.5 [李/杨]
 + 陆地海洋卫星遥感数据获取
-  + [ ] GOCI data [孙]
-  + [ ] MOD09 [杨]
-+ [ ] 气象数据：T, P, 风速, (RH) [陈/杨]
+  + [x] GOCI data [孙]
+  + [x] MOD09 [杨]
++ [x] 气象数据：T, P, 风速, (RH) [陈/杨]
 + [ ] 自然数据：NDVI, DEM [杨]
 + [ ] AERONET [杨]
 
-## 数据预处理  ![Progress](http://progressed.io/bar/5)
+## 数据预处理  ![Progress](http://progressed.io/bar/25)
 试验[ 7月11日 ]<br>
 所有数据产品的范围、投影坐标信息、尺度分辨率统一：
 
@@ -28,7 +28,7 @@
   + [ ] 反演算法DB=> AOD，裁掉海洋，和AERONET进行回归分析和校正 [李]
   + [ ] 海洋：通过GOCI的AOT产品结果，与陆地进行拼接 [孙/杨]
 + 空间全域插值气象数据T, P, 风速, (RH) 
-  + [ ] ArcGIS/QGIS批处理 [陈/杨]
+  + [x] ArcGIS/QGIS批处理 [陈/杨]
 + 空间连接（陆地）
   + [ ] 把所有自变量空间关联到PM2.5站点 [李/孙]
 
