@@ -290,27 +290,29 @@ def main():
     cloud, proj_cloud, geotrans_cloud = run.read_img(raster_cloud)
 
     lut_filepath = args.lut
-    # multi-process here
+
+    # multi-process
     out_data0 = AOD_Deepblue(data, lut_filepath, mod09, cloud)
+
     out_name = ['aod']
     out_name += raster_toa.split('/')[-1][:-4].split('-')[1:]
     out_name = '-'.join(out_name)
-    out_file = args.output + out_name + '_tmp.tif'
-    plt.imshow(out_data0)
+    out_file0 = args.output + out_name + '_tmp.tif'
     plt.savefig(args.output + out_name + '_tmp_thumb.jpg')
-
-    run.write_img(out_file, out_data0, proj, geotrans, 'tif')
+    run.write_img(out_file0, out_data0, proj, geotrans, 'tif')
     print('AOD retrieval finished!!!!')
+
+    out_file1 = args.output + out_name + '_origin.tif'
+    plt.savefig(args.output + out_name + '_origin_thumb.jpg')
+    run.write_img(out_file1, data, proj, geotrans, 'tif')
 
     _start = datetime.datetime.now()
     out_data = Fast_interpolate(out_data0, data)
     _end = datetime.datetime.now()
     print('Interpolate time cost:', _end - _start)
-    plt.imshow(out_data)
     plt.savefig(args.output + out_name + '_thumb.jpg')
-
-    out_file = args.output + out_name + '.tif'
-    run.write_img(out_file, out_data, proj, geotrans, 'tif')
+    out_file2 = args.output + out_name + '.tif'
+    run.write_img(out_file2, out_data, proj, geotrans, 'tif')
 
     # Re-sampling
     # shrink_NEAREST = cv2.resize(out_data0, out_size, interpolation=cv2.INTER_NEAREST)
