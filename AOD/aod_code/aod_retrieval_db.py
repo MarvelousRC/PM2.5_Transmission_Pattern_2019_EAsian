@@ -198,45 +198,54 @@ def LUT_match(data, lut, idi, idj, mod09):
 def Fast_interpolate(aod, data):
     """Interpolate the mask area -> 0.0"""
     row, col = aod.shape[0], aod.shape[1]
+    _eps = 1e-4
     for idi, i in enumerate(aod):
-        # print('interpolate', idi)
+        print('interpolate', idi)
         for idj, j in enumerate(i):
             if data[idi][idj] == 0.0:
                 # assign range
+                # print('interpolate', idi, idj)
                 x = 1
                 while True:
                     flag = 0
                     for t in range(idj-x, idj+x+1):
-                        if idi-x >= 0 and idi+x < row and 0 <= t < col:
-                            if aod[idi-x][t] > 0.0 or aod[idi+x][t] > 0.0:
+                        if 0 <= t < col:
+                            if idi - x >= 0 and aod[idi-x][t] > _eps:
+                                flag = 1
+                                break
+                            if idi + x < row and aod[idi+x][t] > _eps:
                                 flag = 1
                                 break
                     for t in range(idi-x, idi+x+1):
-                        if 0 <= t < row and idj-x >= 0 and idj+x < col:
-                            if aod[t][idj-x] > 0.0 or aod[t][idj+x] > 0.0:
+                        if 0 <= t < row:
+                            if idj - x >= 0.0 and aod[t][idj-x] > _eps:
+                                flag = 1
+                                break
+                            if idj + x < col and aod[t][idj+x] > _eps:
                                 flag = 1
                                 break
                     if flag == 1:
                         break
                     x += 1
+                # print(x)
 
-                # calculate mean
+                # calculate meansh
                 cnt = 0
                 tot = 0
                 for t in range(idj-x, idj+x+1):
-                    if idi - x >= 0 and idi + x < row and 0 <= t < col:
-                        if aod[idi + x][t] > 0.0:
-                            tot += aod[idi + x][t]
-                            cnt += 1
-                        if aod[idi - x][t] > 0.0:
+                    if 0 <= t < col:
+                        if idi - x >= 0 and aod[idi - x][t] > _eps:
                             tot += aod[idi - x][t]
                             cnt += 1
+                        if idi + x < row and aod[idi + x][t] > _eps:
+                            tot += aod[idi + x][t]
+                            cnt += 1
                 for t in range(idi-x+1, idi+x):
-                    if 0 <= t < row and idj - x >= 0 and idj + x < col:
-                        if aod[t][idj - x] > 0.0:
+                    if 0 <= t < row:
+                        if idj - x >= 0.0 and aod[t][idj - x] > _eps:
                             tot += aod[t][idj - x]
                             cnt += 1
-                        if aod[t][idj + x] > 0.0:
+                        if idj + x < col and aod[t][idj + x] > _eps:
                             tot += aod[t][idj + x]
                             cnt += 1
                 if cnt == 0:
@@ -298,12 +307,12 @@ def main():
     out_name += raster_toa.split('/')[-1][:-4].split('-')[1:]
     out_name = '-'.join(out_name)
     out_file0 = args.output + out_name + '_tmp.tif'
-
     run.write_img(out_file0, out_data0, proj, geotrans, 'tif')
     print('AOD retrieval finished!!!!')
+    plt.imshow(out_data0)
+    plt.savefig(args.output + out_name + '_tmp_thumb.png')
 
     out_file1 = args.output + out_name + '_origin.tif'
-
     run.write_img(out_file1, data, proj, geotrans, 'tif')
 
     _start = datetime.datetime.now()
@@ -314,8 +323,7 @@ def main():
     out_file2 = args.output + out_name + '.tif'
     run.write_img(out_file2, out_data, proj, geotrans, 'tif')
 
-    plt.imshow(out_data0)
-    plt.savefig(args.output + out_name + '_tmp_thumb.png')
+
     plt.imshow(data)
     plt.savefig(args.output + out_name + '_origin_thumb.png')
     plt.imshow(out_data)
