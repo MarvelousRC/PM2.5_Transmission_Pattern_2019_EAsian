@@ -16,9 +16,9 @@ NASA有提供直接的AOD产品——MYD04(550nm)。AOD除了和大气的组成�
 $$\rho_{TOA}$$是表观反射率，$$\rho_{s}$$是地表反射率，其余的是与大气相关参数。
 其中地表反射率还有一个公式：
 
-![](http://latex.codecogs.com/gif.latex?\rho_{TOA} = \frac{\pi L_{\lambda} D^2}{ESUN_{\lambda}cos\theta})
+![](http://latex.codecogs.com/gif.latex?\\rho_{TOA} = \\frac{\\pi L_{\\lambda} D^2}{ESUN_{\\lambda}cos\\theta})
 
-其中D是天文单位的日地距离，恰巧日地距离就是一个天文单位。 ![](http://latex.codecogs.com/gif.latex?L_\lambda)是经过辐射校正之后的辐亮度，任何卫星应该在拍摄的时候记录下来gain和bias的数值，就是一个线性的变换。![](http://latex.codecogs.com/gif.latex?\theta)是太阳天顶角，也是卫星元数据的一部分。![](http://latex.codecogs.com/gif.latex?ESUN_{\lambda})是大气顶部的太阳辐照度值，是波长的函数，有论文指出了我们需要用到的波段的该值。通过此公式，我们即可由遥感原始数据的DN值推导出表观反射率。
+其中D是天文单位的日地距离，恰巧日地距离就是一个天文单位。 ![](http://latex.codecogs.com/gif.latex?L_\\lambda)是经过辐射校正之后的辐亮度，任何卫星应该在拍摄的时候记录下来gain和bias的数值，就是一个线性的变换。![](http://latex.codecogs.com/gif.latex?\theta)是太阳天顶角，也是卫星元数据的一部分。![](http://latex.codecogs.com/gif.latex?ESUN_{\\lambda})是大气顶部的太阳辐照度值，是波长的函数，有论文指出了我们需要用到的波段的该值。通过此公式，我们即可由遥感原始数据的DN值推导出表观反射率。
 
 
 > At many wavelengths of visible light, the contrast between aerosols and the surface is difficult to discern, but in the 412 nm band——the "deep blue" band, aerosol signals tend to be bright and surface features dark.    ——NASA
@@ -38,5 +38,3 @@ python aod_retrieval_db.py --goci ../aod_retrieval_data/L1B1_land/L1B1_land-14-1
 
 ## 用什么测评
 NASA有相关的监测站是专门用来测AOD，以及他们有MYD04的产品直接是AOD的栅格，可以用作检验反演算法的有效性。
-
-![](http://latex.codecogs.com/gif.latex?\frac{1}{1+sin(x)})
