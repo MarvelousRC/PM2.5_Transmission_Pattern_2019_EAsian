@@ -1,6 +1,7 @@
 # 编程者：孙克染
 # 功能：实现地理加权回归模型
-# 输入：训练样本点CSV文件
+# 输入：训练样本点CSV文件，预测点解释变量栅格
+# 输出：回归系数栅格、local r^2栅格、模型拟合评价
 
 import math
 import time
@@ -9,6 +10,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import multiprocessing as mp
 from osgeo import gdal
+from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 
 
 class Grid(object):
@@ -80,6 +82,12 @@ class Grid(object):
 # global variables
 # global y_avg, y_s2, x_min, x_max, y_min, y_max, b_final, img_templete, proj_templete, geotrans_templete
 # global img_intercept, img_aod, img_t, img_p, img_ws, img_dem, img_ndvi
+parser = ArgumentParser("aod_retrieval", formatter_class=ArgumentDefaultsHelpFormatter, conflict_handler='resolve')
+parser.add_argument('--date')
+parser.add_argument('--utm')
+args = parser.parse_args()
+date_str = args.date
+utm_str = args.utm
 y_avg = 0  # 训练样本被解释变量平均值
 y_s2 = 0  # 训练样本被解释变量方差
 x_min = -1225790
@@ -88,7 +96,7 @@ y_min = -639572
 y_max = 685124
 b_final = 500000  # 确定的最佳带宽
 b_n_final = 16  # 确定的最佳数量
-file_name = './data/aod-14-1.tif'
+file_name = './data/aod-' + date_str + '-' + utm_str + '.tif'
 list_train_y_predict = []
 img_templete, proj_templete, geotrans_templete = Grid.read_img(file_name)
 line_num, row_num = img_templete.shape
@@ -97,38 +105,43 @@ img_aod = img_templete.copy()
 img_t = img_templete.copy()
 img_p = img_templete.copy()
 img_ws = img_templete.copy()
+img_rh = img_templete.copy()
 img_dem = img_templete.copy()
 img_ndvi = img_templete.copy()
 img_local_r = img_templete.copy()
+text_str = ''
 
 
 def read_csv_file():
-    source_data_l = {'name': [], 'lon': [], 'lat': [], 'pm2_5': [], 'aod': [], 't': [], 'p': [], 'ws': [], 'dem': [],
-                   'ndvi': [], 'x': [], 'y': []}
-    with open(r'.\data\data-14-1.csv', 'r') as file:
+    global date_str, utm_str
+    source_data_l = {'id': [], 'name': [], 'lat': [], 'lon': [], 'pm2_5': [], 'aod': [], 't': [], 'p': [], 'ws': [],
+                     'rh': [], 'dem': [], 'ndvi': [], 'x': [], 'y': []}
+    with open(r'.\table\data-' + date_str + '-' + utm_str + '.csv', 'r') as file:
         lines = file.read().splitlines()
         for i in range(len(lines)):
             lines[i].replace(' ', '')
             line_list = lines[i].split(',')
             if i != 0:
-                source_data_l['name'].append(line_list[0])
-                source_data_l['lon'].append(float(line_list[1]))
+                source_data_l['id'].append(int(line_list[0]))
+                source_data_l['name'].append(line_list[1])
+                source_data_l['lon'].append(float(line_list[3]))
                 source_data_l['lat'].append(float(line_list[2]))
-                source_data_l['x'].append(float(line_list[3]))
-                source_data_l['y'].append(float(line_list[4]))
-                source_data_l['pm2_5'].append(float(line_list[5]))
-                source_data_l['aod'].append(float(line_list[6]))
-                source_data_l['t'].append(float(line_list[7]))
-                source_data_l['p'].append(float(line_list[8]))
-                source_data_l['ws'].append(float(line_list[9]))
-                source_data_l['dem'].append(float(line_list[10]))
-                source_data_l['ndvi'].append(float(line_list[11]))
+                source_data_l['x'].append(float(line_list[14]))
+                source_data_l['y'].append(float(line_list[15]))
+                source_data_l['pm2_5'].append(float(line_list[4]))
+                source_data_l['aod'].append(float(line_list[5]))
+                source_data_l['t'].append(float(line_list[6]))
+                source_data_l['p'].append(float(line_list[9]))
+                source_data_l['ws'].append(float(line_list[11]))
+                source_data_l['rh'].append(float(line_list[8]))
+                source_data_l['dem'].append(float(line_list[13]))
+                source_data_l['ndvi'].append(float(line_list[12]))
         return source_data_l
 
 
 source_data = read_csv_file()
 NUMBER = len(source_data['name'])  # 训练样本的个数
-k = 6  # 解释变量的个数
+k = 7  # 解释变量的个数
 
 
 def cal_weight_matrix(x, y, u, v, b_x, bandwidth_type, weight_matrix_type, number):
@@ -154,7 +167,7 @@ def cal_weight_matrix(x, y, u, v, b_x, bandwidth_type, weight_matrix_type, numbe
             d = math.sqrt((x - u[i]) ** 2 + (y - v[i]) ** 2)
             distance_list.append(d)
         distance_list.sort()
-        b = distance_list[b_x]
+        b = distance_list[b_x - 1]
         if weight_matrix_type == 'bi-square':
             for i in range(number):
                 d = math.sqrt((x - u[i]) ** 2 + (y - v[i]) ** 2)
@@ -219,7 +232,7 @@ def aic_test(matrix_xt_aic, matrix_x_aic, matrix_y_aic):
 
 
 def aic_test_random():
-    global source_data, NUMBER
+    global source_data, NUMBER, text_str
     number_random = int(0.7 * NUMBER)
     # list_b = [1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000, 500000, 1000000, 2000000, 5000000, 10000000,
     #           20000000, 50000000]
@@ -228,7 +241,7 @@ def aic_test_random():
     index_shuffle = list(range(NUMBER))
     random.shuffle(index_shuffle)
     source_data_random = {'name': [], 'lon': [], 'lat': [], 'pm2_5': [], 'aod': [], 't': [], 'p': [], 'ws': [],
-                          'dem': [], 'ndvi': [], 'x': [], 'y': []}
+                          'rh': [],  'dem': [], 'ndvi': [], 'x': [], 'y': []}
     for i in range(number_random):
         source_data_random['name'].append(source_data['name'][index_shuffle[i]])
         source_data_random['lon'].append(source_data['lon'][index_shuffle[i]])
@@ -238,16 +251,18 @@ def aic_test_random():
         source_data_random['t'].append(source_data['t'][index_shuffle[i]])
         source_data_random['p'].append(source_data['p'][index_shuffle[i]])
         source_data_random['ws'].append(source_data['ws'][index_shuffle[i]])
+        source_data_random['rh'].append(source_data['rh'][index_shuffle[i]])
         source_data_random['dem'].append(source_data['dem'][index_shuffle[i]])
         source_data_random['ndvi'].append(source_data['ndvi'][index_shuffle[i]])
         source_data_random['x'].append(source_data['x'][index_shuffle[i]])
         source_data_random['y'].append(source_data['y'][index_shuffle[i]])
     matrix_xt_random = np.mat([[1]*number_random, source_data_random['aod'], source_data_random['t'],
-                               source_data_random['p'], source_data_random['ws'],
+                               source_data_random['p'], source_data_random['ws'], source_data_random['rh'],
                                source_data_random['dem'], source_data_random['ndvi']])  # 训练集解释变量矩阵
     matrix_x_random = matrix_xt_random.T  # 训练集解释变量矩阵转置
     matrix_yt_random = np.mat(source_data_random['pm2_5'])  # 训练集被解释变量矩阵转置
     matrix_y_random = matrix_yt_random.T  # 训练集被解释变量矩阵
+    text_str += '\n不同的带宽数量对应的全局R^2\n'
     # 遍历每一种带宽
     for i in range(len(list_b_n)):
         square_sum = 0
@@ -263,17 +278,19 @@ def aic_test_random():
             # print('回归系数矩阵 b: \n{}'.format(test_matrix_b))
             matrix_x_to_predict = np.mat([1, source_data['aod'][index_shuffle[j]], source_data['t'][index_shuffle[j]],
                                           source_data['p'][index_shuffle[j]], source_data['ws'][index_shuffle[j]],
-                                          source_data['dem'][index_shuffle[j]], source_data['ndvi'][index_shuffle[j]]])
+                                          source_data['rh'][index_shuffle[j]], source_data['dem'][index_shuffle[j]],
+                                          source_data['ndvi'][index_shuffle[j]]])
             y_pre = cal_predict(test_matrix_b, matrix_x_to_predict)
             square_sum += (y_pre - source_data['pm2_5'][index_shuffle[j]]) ** 2
             # print(matrix_y_aic[j, 0], y_pre)
             list_y.append(y_pre)
         # if list_b_n[i] == b_n_final:
         #     list_train_y_predict = list_y.copy()
-        aic = math.log(square_sum / NUMBER) + 2 * (k + 1) / NUMBER
+        aic = math.log(square_sum / number_random) + 2 * (k + 1) / number_random
         list_aic.append(aic)
         # print('b: {}   r^2: {} {}'.format(list_b[i], test_global_r(list_y), 1-(square_sum / y_s2)))
-        print('b_n: {}   r^2: {} {}'.format(list_b_n[i], test_global_r(list_y), 1 - (square_sum / y_s2)))
+        # print('b_n: {}   r^2: {} {}'.format(list_b_n[i], test_global_r(list_y), 1 - (square_sum / y_s2)))
+        text_str += 'b_n: {}   r^2: {:.4f} {:.4f}\n'.format(list_b_n[i], test_global_r(list_y), 1 - (square_sum / y_s2))
     return list_aic
 
 
@@ -317,8 +334,8 @@ def get_cor(x_index, y_index):
 
 
 def gwr_predict(processor_index, num_processor, matrix_xt_gwr, matrix_x_gwr, matrix_y_gwr):
-    global source_data, img_intercept, img_aod, img_t, img_p, img_ws, img_dem, img_ndvi, img_local_r, line_num, row_num
-    global b_n_final, b_final, NUMBER
+    global source_data, img_intercept, img_aod, img_t, img_p, img_ws, img_rh, img_dem, img_ndvi, img_local_r
+    global b_n_final, b_final, NUMBER, line_num, row_num
     result = dict()
     start = int(processor_index * (line_num // num_processor))
     end = int((processor_index + 1) * (line_num // num_processor))
@@ -340,8 +357,9 @@ def gwr_predict(processor_index, num_processor, matrix_xt_gwr, matrix_x_gwr, mat
             img_t[i][j] = matrix_b[2, 0]
             img_p[i][j] = matrix_b[3, 0]
             img_ws[i][j] = matrix_b[4, 0]
-            img_dem[i][j] = matrix_b[5, 0]
-            img_ndvi[i][j] = matrix_b[6, 0]
+            img_rh[i][j] = matrix_b[5, 0]
+            img_dem[i][j] = matrix_b[6, 0]
+            img_ndvi[i][j] = matrix_b[7, 0]
             img_local_r[i][j] = test_local_r(matrix_w)
         end_time = time.process_time()
         print('Processor {}: {}-th line has been finished! Time cost for this line: {:.3f}s, '
@@ -351,6 +369,7 @@ def gwr_predict(processor_index, num_processor, matrix_xt_gwr, matrix_x_gwr, mat
     result['t'] = img_t
     result['p'] = img_p
     result['ws'] = img_ws
+    result['rh'] = img_rh
     result['dem'] = img_dem
     result['ndvi'] = img_ndvi
     result['local_r'] = img_local_r
@@ -371,7 +390,7 @@ def dispose(matrix_xt_dis, matrix_x_dis, matrix_y_dis):
     print('Multiprocessing ends!')
     # gwr_predict(0, 1, matrix_xt_dis, matrix_x_dis, matrix_y_dis)
 
-    global img_intercept, img_aod, img_t, img_p, img_ws, img_dem, img_ndvi, proj_templete, geotrans_templete
+    global img_intercept, img_aod, img_t, img_p, img_ws, img_rh, img_dem, img_ndvi, proj_templete, geotrans_templete
     global line_num, row_num, img_local_r
     for processor_index in range(num_pro):
         start = int(processor_index * (line_num // num_pro))
@@ -385,46 +404,103 @@ def dispose(matrix_xt_dis, matrix_x_dis, matrix_y_dis):
                 img_t[i][j] = results[processor_index].get()['t'][i, j]
                 img_p[i][j] = results[processor_index].get()['p'][i, j]
                 img_ws[i][j] = results[processor_index].get()['ws'][i, j]
+                img_rh[i][j] = results[processor_index].get()['rh'][i, j]
                 img_dem[i][j] = results[processor_index].get()['dem'][i, j]
                 img_ndvi[i][j] = results[processor_index].get()['ndvi'][i, j]
                 img_local_r[i][j] = results[processor_index].get()['local_r'][i, j]
-    Grid.write_img('./data/c_intercept-14-1.tif', img_intercept, proj_templete, geotrans_templete, 'tif')
-    Grid.write_img('./data/c_aod-14-1.tif', img_aod, proj_templete, geotrans_templete, 'tif')
-    Grid.write_img('./data/c_t-14-1.tif', img_t, proj_templete, geotrans_templete, 'tif')
-    Grid.write_img('./data/c_p-14-1.tif', img_p, proj_templete, geotrans_templete, 'tif')
-    Grid.write_img('./data/c_ws-14-1.tif', img_ws, proj_templete, geotrans_templete, 'tif')
-    Grid.write_img('./data/c_dem-14-1.tif', img_dem, proj_templete, geotrans_templete, 'tif')
-    Grid.write_img('./data/c_ndvi-14-1.tif', img_ndvi, proj_templete, geotrans_templete, 'tif')
-    Grid.write_img('./data/local_r-14-1.tif', img_local_r, proj_templete, geotrans_templete, 'tif')
+    Grid.write_img('./result/c_intercept-' + date_str + '-' + utm_str + '.tif', img_intercept, proj_templete,
+                   geotrans_templete, 'tif')
+    Grid.write_img('./result/c_aod-' + date_str + '-' + utm_str + '.tif', img_aod, proj_templete,
+                   geotrans_templete, 'tif')
+    Grid.write_img('./result/c_t-' + date_str + '-' + utm_str + '.tif', img_t, proj_templete,
+                   geotrans_templete, 'tif')
+    Grid.write_img('./result/c_p-' + date_str + '-' + utm_str + '.tif', img_p, proj_templete,
+                   geotrans_templete, 'tif')
+    Grid.write_img('./result/c_ws-' + date_str + '-' + utm_str + '.tif', img_ws, proj_templete,
+                   geotrans_templete, 'tif')
+    Grid.write_img('./result/c_rh-' + date_str + '-' + utm_str + '.tif', img_rh, proj_templete,
+                   geotrans_templete, 'tif')
+    Grid.write_img('./result/c_dem-' + date_str + '-' + utm_str + '.tif', img_dem, proj_templete,
+                   geotrans_templete, 'tif')
+    Grid.write_img('./result/c_ndvi-' + date_str + '-' + utm_str + '.tif', img_ndvi, proj_templete,
+                   geotrans_templete, 'tif')
+    Grid.write_img('./result/local_r-' + date_str + '-' + utm_str + '.tif', img_local_r, proj_templete,
+                   geotrans_templete, 'tif')
+    print('GWR finished!')
+    print('PM2.5 calculation starts!')
+    data_prepared = dict()
+    data_prepared['c_intercept'] = img_intercept
+    data_prepared['c_aod'] = img_aod
+    data_prepared['c_t'] = img_t
+    data_prepared['c_p'] = img_p
+    data_prepared['c_ws'] = img_ws
+    data_prepared['c_rh'] = img_rh
+    data_prepared['c_dem'] = img_dem
+    data_prepared['c_ndvi'] = img_ndvi
+    data_prepared['proj'] = proj_templete
+    data_prepared['geo'] = geotrans_templete
+    grid_calculation(data_prepared)
+
+
+def grid_calculation(data):
+    global date_str, utm_str
+    dic1 = './img_data/'
+    dic2 = '-' + date_str + '-' + utm_str + '.tif'
+    cs = ['aod', 't', 'p', 'ws', 'rh', 'dem', 'ndvi']
+    for index in range(len(cs)):
+        if index < len(cs) - 2:
+            dic = dic1 + cs[index] + dic2
+        else:
+            dic = dic1 + cs[index] + '.tif'
+        img_temp, proj_temp, geotrans_temp = Grid.read_img(dic)
+        data[cs[index]] = img_temp
+    img_result = data['c_intercept'] + data['c_aod'] * data['aod'] + data['c_t'] * data['t'] + \
+                 data['c_p'] * data['p'] + data['c_ws'] * data['ws'] + data['c_rh'] * data['rh'] + \
+                 data['c_dem'] * data['dem'] + data['c_ndvi'] * data['ndvi']
+    Grid.write_img('./result/pm25_predict-' + date_str + '-' + utm_str + '.tif',
+                   img_result, data['proj'], data['geo'], 'tif')
+    print('PM2.5 calculation finished!')
 
 
 if __name__ == '__main__':
     # 数据输入、准备阶段
     print('全部的训练样本数目: {}   全部的解释变量个数: {}'.format(NUMBER, k))
+    text_str += 'GWR 结果\n'
+    text_str += '全部的训练样本数目: {}   全部的解释变量个数: {}\n'.format(NUMBER, k)
     y_avg = sum(source_data['pm2_5']) / NUMBER  # 训练样本被解释变量平均值
     for pm25 in source_data['pm2_5']:
         y_s2 += (pm25 - y_avg)**2  # 训练样本被解释变量方差
     print('y_avg: {}   y_s2: {}'.format(y_avg, y_s2))
     matrix_xt = np.mat([[1]*NUMBER, source_data['aod'], source_data['t'], source_data['p'], source_data['ws'],
-                          source_data['dem'], source_data['ndvi']])  # 解释变量矩阵
+                        source_data['rh'], source_data['dem'], source_data['ndvi']])  # 解释变量矩阵
     matrix_x = matrix_xt.T  # 解释变量矩阵转置
     matrix_yt = np.mat(source_data['pm2_5'])  # 被解释变量矩阵转置
     matrix_y = matrix_yt.T  # 被解释变量矩阵
-    print('解释变量矩阵 X: \n{}'.format(matrix_x))
-    print('被解释变量矩阵 Y: \n{}'.format(matrix_y))
+    # print('解释变量矩阵 X: \n{}'.format(matrix_x))
+    # print('被解释变量矩阵 Y: \n{}'.format(matrix_y))
 
     # 确定最佳带宽
     aicc_list = aic_test_random()
-    print(aicc_list)
     fig = plt.figure(figsize=(10, 6))
-    chart = np.arange(1, 17)
+    chart = np.arange(5, 21)
     plt.rcParams['font.sans-serif'] = ['SimHei']
     plt.rcParams['axes.unicode_minus'] = False
     plt.plot(chart, aicc_list, c='red')
-    plt.title('AICc与带宽大小b之间的走势')
+    plt.title('AICc与带宽大小b_n之间的走势')
     plt.xlabel('第x个带宽大小')
     plt.ylabel('AICc')
-    plt.show()
+    plt.savefig('./result/aic-' + date_str + '-' + utm_str + '.png')
+    # plt.show()
 
-    # 生成回归系数栅格图
+    # 输出模型拟合信息
+    text_str += '\n不同的带宽数量对应的AICc\n'
+    for i in range(5, 21):
+        text_str += 'b_n: {}   AICc: {:.4f}\n'.format(i, aicc_list[i-5])
+    text_str += '\n选定的带宽数量为 {}\n'.format(b_n_final)
+    text_file = open(r'.\result\result-' + date_str + '-' + utm_str + '.txt', 'w')
+    text_file.write(text_str)
+    text_file.close()
+
+    # 生成回归系数栅格图、预测值栅格图
     dispose(matrix_xt, matrix_x, matrix_y)
+    print('All works Finished!')
