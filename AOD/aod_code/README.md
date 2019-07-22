@@ -11,7 +11,7 @@ NASA有提供直接的AOD产品——MYD04(550nm)。AOD除了和大气的组成�
 
 ![](http://latex.codecogs.com/gif.latex?\rho_{TOA}(\theta_{S},\theta_{v})=\rho_{0}(\theta_{S},\theta_{v})+\frac{T(\theta_{S})T(\theta_{v})\rho(\theta_{S},\theta_{v})}{1-S\cdot{\rho_{S}}(\theta_{S},\theta_{v})})
 
-$$\rho_{TOA}$$是表观反射率，$\rho_{s}$是地表反射率，其余的是与大气相关参数。
+![](http://latex.codecogs.com/gif.latex?\rho_{TOA})是表观反射率，![](http://latex.codecogs.com/gif.latex?\rho_{s})是地表反射率，其余的是与大气相关参数。
 其中地表反射率还有一个公式：
 
 ![](http://latex.codecogs.com/gif.latex?\rho_{TOA}=\frac{\pi{L_{\lambda}}D^2}{ESUN_{\lambda}cos\theta})
