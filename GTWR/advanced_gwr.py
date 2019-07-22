@@ -2,12 +2,13 @@
 # 功能：实现地理加权回归模型
 # 输入：训练样本点CSV文件
 
+import math
+import time
+import random
 import numpy as np
 import matplotlib.pyplot as plt
-import math
-from osgeo import gdal
-import time
 import multiprocessing as mp
+from osgeo import gdal
 
 
 class Grid(object):
@@ -86,10 +87,10 @@ x_max = 53952
 y_min = -639572
 y_max = 685124
 b_final = 500000  # 确定的最佳带宽
-b_n_final = 15  # 确定的最佳数量
-file_tmp = './data/aod-14-1.tif'
+b_n_final = 16  # 确定的最佳数量
+file_name = './data/aod-14-1.tif'
 list_train_y_predict = []
-img_templete, proj_templete, geotrans_templete = Grid.read_img(file_tmp)
+img_templete, proj_templete, geotrans_templete = Grid.read_img(file_name)
 line_num, row_num = img_templete.shape
 img_intercept = img_templete.copy()
 img_aod = img_templete.copy()
@@ -130,40 +131,39 @@ NUMBER = len(source_data['name'])  # 训练样本的个数
 k = 6  # 解释变量的个数
 
 
-def cal_weight_matrix(x, y, u, v, b_x, bandwidth_type, weight_matrix_type):
-    global NUMBER
-    result = np.eye(NUMBER)
+def cal_weight_matrix(x, y, u, v, b_x, bandwidth_type, weight_matrix_type, number):
+    result = np.eye(number)
     distance_list = []
     if bandwidth_type == 'fixed':
         if weight_matrix_type == 'bi-square':
-            for i in range(NUMBER):
+            for i in range(number):
                 d = math.sqrt((x - u[i]) ** 2 + (y - v[i]) ** 2)
                 if d <= b_x:
                     result[i][i] = (1 - (d / b_x) ** 2) ** 2
                 else:
                     result[i][i] = 0.0
         else:
-            for i in range(NUMBER):
+            for i in range(number):
                 d = math.sqrt((x - u[i]) ** 2 + (y - v[i]) ** 2)
                 if d <= b_x:
                     result[i][i] = math.e ** (-(d / b_x) ** 2)
                 else:
                     result[i][i] = 0.0
     else:
-        for i in range(NUMBER):
+        for i in range(number):
             d = math.sqrt((x - u[i]) ** 2 + (y - v[i]) ** 2)
             distance_list.append(d)
         distance_list.sort()
         b = distance_list[b_x]
         if weight_matrix_type == 'bi-square':
-            for i in range(NUMBER):
+            for i in range(number):
                 d = math.sqrt((x - u[i]) ** 2 + (y - v[i]) ** 2)
                 if d <= b:
                     result[i][i] = (1 - (d / b) ** 2) ** 2
                 else:
                     result[i][i] = 0.0
         else:
-            for i in range(NUMBER):
+            for i in range(number):
                 d = math.sqrt((x - u[i]) ** 2 + (y - v[i]) ** 2)
                 if d <= b:
                     result[i][i] = math.e ** (-(d / b) ** 2)
@@ -187,8 +187,9 @@ def cal_result(matrix_w, matrix_xt_cal, matrix_x_cal, matrix_y_cal):
 
 def aic_test(matrix_xt_aic, matrix_x_aic, matrix_y_aic):
     global source_data, NUMBER, k, y_s2, b_final, b_n_final, list_train_y_predict
-    # list_b = [1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000, 500000, 1000000]
-    list_b_n = list(range(5, 15))
+    # list_b = [1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000, 500000, 1000000, 2000000, 5000000, 10000000,
+    #           20000000, 50000000]
+    list_b_n = list(range(5, 21))
     list_aic = []
     # 遍历每一种带宽
     for i in range(len(list_b_n)):
@@ -198,9 +199,9 @@ def aic_test(matrix_xt_aic, matrix_x_aic, matrix_y_aic):
         list_y = []
         for j in range(NUMBER):
             # matrix_w = cal_weight_matrix(source_data['x'][j], source_data['y'][j], source_data['x'], source_data['y'],
-            #                              list_b[i], 'fixed', 'bi-square')
+            #                              list_b[i], 'fixed', 'bi-square', NUMBER)
             matrix_w = cal_weight_matrix(source_data['x'][j], source_data['y'][j], source_data['x'], source_data['y'],
-                                         list_b_n[i], 'adaptive', 'bi-square')
+                                         list_b_n[i], 'adaptive', 'bi-square', NUMBER)
             # print('权重矩阵 W: \n{}'.format(matrix_w))
             test_matrix_b = cal_result(matrix_w, matrix_xt_aic, matrix_x_aic, matrix_y_aic)
             # print('回归系数矩阵 b: \n{}'.format(test_matrix_b))
@@ -210,6 +211,65 @@ def aic_test(matrix_xt_aic, matrix_x_aic, matrix_y_aic):
             list_y.append(y_pre)
         if list_b_n[i] == b_n_final:
             list_train_y_predict = list_y.copy()
+        aic = math.log(square_sum / NUMBER) + 2 * (k + 1) / NUMBER
+        list_aic.append(aic)
+        # print('b: {}   r^2: {} {}'.format(list_b[i], test_global_r(list_y), 1-(square_sum / y_s2)))
+        print('b_n: {}   r^2: {} {}'.format(list_b_n[i], test_global_r(list_y), 1 - (square_sum / y_s2)))
+    return list_aic
+
+
+def aic_test_random():
+    global source_data, NUMBER
+    number_random = int(0.7 * NUMBER)
+    # list_b = [1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000, 500000, 1000000, 2000000, 5000000, 10000000,
+    #           20000000, 50000000]
+    list_b_n = list(range(5, 21))
+    list_aic = []
+    index_shuffle = list(range(NUMBER))
+    random.shuffle(index_shuffle)
+    source_data_random = {'name': [], 'lon': [], 'lat': [], 'pm2_5': [], 'aod': [], 't': [], 'p': [], 'ws': [],
+                          'dem': [], 'ndvi': [], 'x': [], 'y': []}
+    for i in range(number_random):
+        source_data_random['name'].append(source_data['name'][index_shuffle[i]])
+        source_data_random['lon'].append(source_data['lon'][index_shuffle[i]])
+        source_data_random['lat'].append(source_data['lat'][index_shuffle[i]])
+        source_data_random['pm2_5'].append(source_data['pm2_5'][index_shuffle[i]])
+        source_data_random['aod'].append(source_data['aod'][index_shuffle[i]])
+        source_data_random['t'].append(source_data['t'][index_shuffle[i]])
+        source_data_random['p'].append(source_data['p'][index_shuffle[i]])
+        source_data_random['ws'].append(source_data['ws'][index_shuffle[i]])
+        source_data_random['dem'].append(source_data['dem'][index_shuffle[i]])
+        source_data_random['ndvi'].append(source_data['ndvi'][index_shuffle[i]])
+        source_data_random['x'].append(source_data['x'][index_shuffle[i]])
+        source_data_random['y'].append(source_data['y'][index_shuffle[i]])
+    matrix_xt_random = np.mat([[1]*number_random, source_data_random['aod'], source_data_random['t'],
+                               source_data_random['p'], source_data_random['ws'],
+                               source_data_random['dem'], source_data_random['ndvi']])  # 训练集解释变量矩阵
+    matrix_x_random = matrix_xt_random.T  # 训练集解释变量矩阵转置
+    matrix_yt_random = np.mat(source_data_random['pm2_5'])  # 训练集被解释变量矩阵转置
+    matrix_y_random = matrix_yt_random.T  # 训练集被解释变量矩阵
+    # 遍历每一种带宽
+    for i in range(len(list_b_n)):
+        square_sum = 0
+        list_y = []
+        for j in range(number_random, NUMBER):
+            # matrix_w = cal_weight_matrix(source_data['x'][j], source_data['y'][j], source_data['x'], source_data['y'],
+            #                              list_b[i], 'fixed', 'bi-square', number_random)
+            matrix_w = cal_weight_matrix(source_data['x'][index_shuffle[j]], source_data['y'][index_shuffle[j]],
+                                         source_data_random['x'], source_data_random['y'],
+                                         list_b_n[i], 'adaptive', 'bi-square', number_random)
+            # print('权重矩阵 W: \n{}'.format(matrix_w))
+            test_matrix_b = cal_result(matrix_w, matrix_xt_random, matrix_x_random, matrix_y_random)
+            # print('回归系数矩阵 b: \n{}'.format(test_matrix_b))
+            matrix_x_to_predict = np.mat([1, source_data['aod'][index_shuffle[j]], source_data['t'][index_shuffle[j]],
+                                          source_data['p'][index_shuffle[j]], source_data['ws'][index_shuffle[j]],
+                                          source_data['dem'][index_shuffle[j]], source_data['ndvi'][index_shuffle[j]]])
+            y_pre = cal_predict(test_matrix_b, matrix_x_to_predict)
+            square_sum += (y_pre - source_data['pm2_5'][index_shuffle[j]]) ** 2
+            # print(matrix_y_aic[j, 0], y_pre)
+            list_y.append(y_pre)
+        # if list_b_n[i] == b_n_final:
+        #     list_train_y_predict = list_y.copy()
         aic = math.log(square_sum / NUMBER) + 2 * (k + 1) / NUMBER
         list_aic.append(aic)
         # print('b: {}   r^2: {} {}'.format(list_b[i], test_global_r(list_y), 1-(square_sum / y_s2)))
@@ -258,7 +318,7 @@ def get_cor(x_index, y_index):
 
 def gwr_predict(processor_index, num_processor, matrix_xt_gwr, matrix_x_gwr, matrix_y_gwr):
     global source_data, img_intercept, img_aod, img_t, img_p, img_ws, img_dem, img_ndvi, img_local_r, line_num, row_num
-    global b_n_final, b_final
+    global b_n_final, b_final, NUMBER
     result = dict()
     start = int(processor_index * (line_num // num_processor))
     end = int((processor_index + 1) * (line_num // num_processor))
@@ -271,9 +331,9 @@ def gwr_predict(processor_index, num_processor, matrix_xt_gwr, matrix_x_gwr, mat
         for j in range(row_num):
             cor = get_cor(i, j)
             # matrix_w = cal_weight_matrix(cor['x'], cor['y'], source_data['x'], source_data['y'],
-            #                              b_final, 'fixed', 'bi-square')
+            #                              b_final, 'fixed', 'bi-square', NUMBER)
             matrix_w = cal_weight_matrix(cor['x'], cor['y'], source_data['x'], source_data['y'],
-                                         b_n_final, 'adaptive', 'bi-square')
+                                         b_n_final, 'adaptive', 'bi-square', NUMBER)
             matrix_b = cal_result(matrix_w, matrix_xt_gwr, matrix_x_gwr, matrix_y_gwr)
             img_intercept[i][j] = matrix_b[0, 0]
             img_aod[i][j] = matrix_b[1, 0]
@@ -293,6 +353,7 @@ def gwr_predict(processor_index, num_processor, matrix_xt_gwr, matrix_x_gwr, mat
     result['ws'] = img_ws
     result['dem'] = img_dem
     result['ndvi'] = img_ndvi
+    result['local_r'] = img_local_r
     print('Processor {}\'s work has been finished!'.format(processor_index))
     return result
 
@@ -311,7 +372,7 @@ def dispose(matrix_xt_dis, matrix_x_dis, matrix_y_dis):
     # gwr_predict(0, 1, matrix_xt_dis, matrix_x_dis, matrix_y_dis)
 
     global img_intercept, img_aod, img_t, img_p, img_ws, img_dem, img_ndvi, proj_templete, geotrans_templete
-    global line_num, row_num
+    global line_num, row_num, img_local_r
     for processor_index in range(num_pro):
         start = int(processor_index * (line_num // num_pro))
         end = int((processor_index + 1) * (line_num // num_pro))
@@ -326,6 +387,7 @@ def dispose(matrix_xt_dis, matrix_x_dis, matrix_y_dis):
                 img_ws[i][j] = results[processor_index].get()['ws'][i, j]
                 img_dem[i][j] = results[processor_index].get()['dem'][i, j]
                 img_ndvi[i][j] = results[processor_index].get()['ndvi'][i, j]
+                img_local_r[i][j] = results[processor_index].get()['local_r'][i, j]
     Grid.write_img('./data/c_intercept-14-1.tif', img_intercept, proj_templete, geotrans_templete, 'tif')
     Grid.write_img('./data/c_aod-14-1.tif', img_aod, proj_templete, geotrans_templete, 'tif')
     Grid.write_img('./data/c_t-14-1.tif', img_t, proj_templete, geotrans_templete, 'tif')
@@ -333,6 +395,7 @@ def dispose(matrix_xt_dis, matrix_x_dis, matrix_y_dis):
     Grid.write_img('./data/c_ws-14-1.tif', img_ws, proj_templete, geotrans_templete, 'tif')
     Grid.write_img('./data/c_dem-14-1.tif', img_dem, proj_templete, geotrans_templete, 'tif')
     Grid.write_img('./data/c_ndvi-14-1.tif', img_ndvi, proj_templete, geotrans_templete, 'tif')
+    Grid.write_img('./data/local_r-14-1.tif', img_local_r, proj_templete, geotrans_templete, 'tif')
 
 
 if __name__ == '__main__':
@@ -351,10 +414,10 @@ if __name__ == '__main__':
     print('被解释变量矩阵 Y: \n{}'.format(matrix_y))
 
     # 确定最佳带宽
-    aicc_list = aic_test(matrix_xt, matrix_x, matrix_y)
+    aicc_list = aic_test_random()
     print(aicc_list)
     fig = plt.figure(figsize=(10, 6))
-    chart = np.arange(1, 11)
+    chart = np.arange(1, 17)
     plt.rcParams['font.sans-serif'] = ['SimHei']
     plt.rcParams['axes.unicode_minus'] = False
     plt.plot(chart, aicc_list, c='red')
@@ -364,5 +427,4 @@ if __name__ == '__main__':
     plt.show()
 
     # 生成回归系数栅格图
-    b_final = 500000  # 确定的最佳带宽
     dispose(matrix_xt, matrix_x, matrix_y)
