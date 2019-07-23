@@ -84,10 +84,10 @@ class Grid(object):
 # global img_intercept, img_aod, img_t, img_p, img_ws, img_dem, img_ndvi
 parser = ArgumentParser("aod_retrieval", formatter_class=ArgumentDefaultsHelpFormatter, conflict_handler='resolve')
 parser.add_argument('--date')
-parser.add_argument('--utm')
+parser.add_argument('--utc')
 args = parser.parse_args()
 date_str = args.date
-utm_str = args.utm
+utm_str = args.utc
 y_avg = 0  # 训练样本被解释变量平均值
 y_s2 = 0  # 训练样本被解释变量方差
 x_min = -1225790
@@ -202,12 +202,13 @@ def aic_test(matrix_xt_aic, matrix_x_aic, matrix_y_aic):
     global source_data, NUMBER, k, y_s2, b_final, b_n_final, list_train_y_predict
     # list_b = [1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000, 500000, 1000000, 2000000, 5000000, 10000000,
     #           20000000, 50000000]
-    list_b_n = list(range(2, 100))
+    list_b_n = list(range(2, 60))
     list_aic = []
     # 遍历每一种带宽
     for i in range(len(list_b_n)):
-        # print(list_b_n[i])
-        # print('实际值', '预测值')
+        # if list_b_n[i] == 30:
+        #     print(list_b_n[i])
+        #     print('实际值', '预测值')
         square_sum = 0
         list_y = []
         for j in range(NUMBER):
@@ -220,7 +221,8 @@ def aic_test(matrix_xt_aic, matrix_x_aic, matrix_y_aic):
             # print('回归系数矩阵 b: \n{}'.format(test_matrix_b))
             y_pre = cal_predict(test_matrix_b, matrix_x_aic[j])
             square_sum += (y_pre - matrix_y_aic[j]) ** 2
-            # print(matrix_y_aic[j, 0], y_pre)
+            # if list_b_n[i] == 30:
+            #     print(matrix_y_aic[j, 0], y_pre)
             list_y.append(y_pre)
         if list_b_n[i] == b_n_final:
             list_train_y_predict = list_y.copy()
@@ -265,7 +267,8 @@ def aic_test_random():
     text_str += '\n不同的带宽数量对应的全局R^2\n'
     # 遍历每一种带宽
     for i in range(len(list_b_n)):
-        # print('\nb_n: {}'.format(list_b_n[i]))
+        # if list_b_n[i] == 30:
+        #     print('\nb_n: {}'.format(list_b_n[i]))
         square_sum = 0
         list_y = []
         for j in range(number_random, NUMBER):
@@ -283,7 +286,8 @@ def aic_test_random():
                                           source_data['ndvi'][index_shuffle[j]]])
             y_pre = cal_predict(test_matrix_b, matrix_x_to_predict)
             square_sum += (y_pre - source_data['pm2_5'][index_shuffle[j]]) ** 2
-            # print(source_data['pm2_5'][index_shuffle[j]], y_pre)
+            # if list_b_n[i] == 30:
+            #     print(source_data['pm2_5'][index_shuffle[j]], y_pre)
             list_y.append(y_pre)
         # if list_b_n[i] == b_n_final:
         #     list_train_y_predict = list_y.copy()
@@ -309,8 +313,8 @@ def test_global_r(list_y):
     return res1 / y_s2
 
 
-def test_local_r(matrix_w_r):
-    global NUMBER, source_data, list_train_y_predict
+def test_local_r(matrix_w_r, list_train_y_predict_local):
+    global NUMBER, source_data
     count, sum1 = 0, 0
     for i in range(NUMBER):
         if matrix_w_r[i, i] > 0:
@@ -318,10 +322,11 @@ def test_local_r(matrix_w_r):
             sum1 += source_data['pm2_5'][i]
     y_avg_local = sum1 / count
     y_predict_sum, y_real_sum = 0, 0
-    for y_predict in list_train_y_predict:
+    for y_predict in list_train_y_predict_local:
         y_predict_sum += (y_predict - y_avg_local) ** 2
     for y_real in source_data['pm2_5']:
         y_real_sum += (y_real - y_avg_local) ** 2
+    # print('local R^2: {}'.format(y_predict_sum / y_real_sum))
     return y_predict_sum / y_real_sum
 
 
@@ -329,12 +334,12 @@ def get_cor(x_index, y_index):
     global x_min, x_max, y_min, y_max
     cor = dict()
     cor.clear()
-    cor['x'] = x_min + 250 + x_index*500
-    cor['y'] = y_min + 250 + y_index*500
+    cor['x'] = x_min + 250 + y_index*500
+    cor['y'] = y_max - 250 - x_index*500
     return cor
 
 
-def gwr_predict(processor_index, num_processor, matrix_xt_gwr, matrix_x_gwr, matrix_y_gwr):
+def gwr_predict(processor_index, num_processor, matrix_xt_gwr, matrix_x_gwr, matrix_y_gwr, list_train_y_predict_local):
     global source_data, img_intercept, img_aod, img_t, img_p, img_ws, img_rh, img_dem, img_ndvi, img_local_r
     global b_n_final, b_final, NUMBER, line_num, row_num
     result = dict()
@@ -361,10 +366,10 @@ def gwr_predict(processor_index, num_processor, matrix_xt_gwr, matrix_x_gwr, mat
             img_rh[i][j] = matrix_b[5, 0]
             img_dem[i][j] = matrix_b[6, 0]
             img_ndvi[i][j] = matrix_b[7, 0]
-            img_local_r[i][j] = test_local_r(matrix_w)
+            img_local_r[i][j] = test_local_r(matrix_w, list_train_y_predict_local)
         end_time = time.process_time()
-        print('进程 {}: 第{}行计算完成! 本行用时: {:.3f}s, '
-              '本进程累计用时: {:.3f}s.'.format(processor_index, i+1, end_time - start_time2, end_time - start_time1))
+        print('进程 {}: 第{:5d}行计算完成! 本行用时: {:6.3f}s, '
+              '本进程累计用时: {:8.3f}s.'.format(processor_index, i+1, end_time - start_time2, end_time - start_time1))
     result['intercept'] = img_intercept
     result['aod'] = img_aod
     result['t'] = img_t
@@ -380,12 +385,14 @@ def gwr_predict(processor_index, num_processor, matrix_xt_gwr, matrix_x_gwr, mat
 
 def dispose(matrix_xt_dis, matrix_x_dis, matrix_y_dis):
     results = []
+    global list_train_y_predict
 
     print('多进程计算开始部署! 请稍候...')
     num_pro = int(0.9 * mp.cpu_count())
     pool = mp.Pool()
     for _iter in range(num_pro):
-        results.append(pool.apply_async(gwr_predict, args=(_iter, num_pro, matrix_xt_dis, matrix_x_dis, matrix_y_dis)))
+        results.append(pool.apply_async(gwr_predict, args=(_iter, num_pro, matrix_xt_dis, matrix_x_dis, matrix_y_dis,
+                                                           list_train_y_predict)))
     pool.close()
     pool.join()
     print('多进程计算完成!')
@@ -427,7 +434,7 @@ def dispose(matrix_xt_dis, matrix_x_dis, matrix_y_dis):
                    geotrans_templete, 'tif')
     Grid.write_img('./result/local_r-' + date_str + '-' + utm_str + '.tif', img_local_r, proj_templete,
                    geotrans_templete, 'tif')
-    print('GWR finished!')
+    print('回归系数拟合完成!')
     print('PM2.5 预测开始! 请稍候...')
     data_prepared = dict()
     data_prepared['c_intercept'] = img_intercept
