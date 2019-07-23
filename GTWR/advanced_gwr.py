@@ -95,7 +95,7 @@ x_max = 53952
 y_min = -639572
 y_max = 685124
 b_final = 500000  # 确定的最佳带宽
-b_n_final = 16  # 确定的最佳数量
+b_n_final = 30  # 确定的最佳数量
 file_name = './img_data/aod-' + date_str + '-' + utm_str + '.tif'
 list_train_y_predict = []
 img_templete, proj_templete, geotrans_templete = Grid.read_img(file_name)
@@ -202,7 +202,7 @@ def aic_test(matrix_xt_aic, matrix_x_aic, matrix_y_aic):
     global source_data, NUMBER, k, y_s2, b_final, b_n_final, list_train_y_predict
     # list_b = [1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000, 500000, 1000000, 2000000, 5000000, 10000000,
     #           20000000, 50000000]
-    list_b_n = list(range(5, 21))
+    list_b_n = list(range(2, 100))
     list_aic = []
     # 遍历每一种带宽
     for i in range(len(list_b_n)):
@@ -227,7 +227,7 @@ def aic_test(matrix_xt_aic, matrix_x_aic, matrix_y_aic):
         aic = math.log(square_sum / NUMBER) + 2 * (k + 1) / NUMBER
         list_aic.append(aic)
         # print('b: {}   r^2: {} {}'.format(list_b[i], test_global_r(list_y), 1-(square_sum / y_s2)))
-        print('b_n: {}   r^2: {} {}'.format(list_b_n[i], test_global_r(list_y), 1 - (square_sum / y_s2)))
+        # print('b_n: {}   r^2: {:.4f} {:.4f}'.format(list_b_n[i], test_global_r(list_y), 1 - (square_sum / y_s2)))
     return list_aic
 
 
@@ -236,7 +236,7 @@ def aic_test_random():
     number_random = int(0.7 * NUMBER)
     # list_b = [1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000, 500000, 1000000, 2000000, 5000000, 10000000,
     #           20000000, 50000000]
-    list_b_n = list(range(5, 21))
+    list_b_n = list(range(1, int(0.69*NUMBER)))
     list_aic = []
     index_shuffle = list(range(NUMBER))
     random.shuffle(index_shuffle)
@@ -265,6 +265,7 @@ def aic_test_random():
     text_str += '\n不同的带宽数量对应的全局R^2\n'
     # 遍历每一种带宽
     for i in range(len(list_b_n)):
+        # print('\nb_n: {}'.format(list_b_n[i]))
         square_sum = 0
         list_y = []
         for j in range(number_random, NUMBER):
@@ -282,7 +283,7 @@ def aic_test_random():
                                           source_data['ndvi'][index_shuffle[j]]])
             y_pre = cal_predict(test_matrix_b, matrix_x_to_predict)
             square_sum += (y_pre - source_data['pm2_5'][index_shuffle[j]]) ** 2
-            # print(matrix_y_aic[j, 0], y_pre)
+            # print(source_data['pm2_5'][index_shuffle[j]], y_pre)
             list_y.append(y_pre)
         # if list_b_n[i] == b_n_final:
         #     list_train_y_predict = list_y.copy()
@@ -342,7 +343,7 @@ def gwr_predict(processor_index, num_processor, matrix_xt_gwr, matrix_x_gwr, mat
     if processor_index == num_processor - 1:
         end = line_num
     start_time1 = time.process_time()
-    print('Processor {}: line index range: {} ~ {}'.format(processor_index, start, end))
+    print('进程 {} 部署完成: 行号范围: {} ~ {}'.format(processor_index, processor_index, start, end))
     for i in range(start, end):
         start_time2 = time.process_time()
         for j in range(row_num):
@@ -362,8 +363,8 @@ def gwr_predict(processor_index, num_processor, matrix_xt_gwr, matrix_x_gwr, mat
             img_ndvi[i][j] = matrix_b[7, 0]
             img_local_r[i][j] = test_local_r(matrix_w)
         end_time = time.process_time()
-        print('Processor {}: {}-th line has been finished! Time cost for this line: {:.3f}s, '
-              'Cumulative time: {:.3f}s.'.format(processor_index, i+1, end_time - start_time2, end_time - start_time1))
+        print('进程 {}: 第{}行计算完成! 本行用时: {:.3f}s, '
+              '本进程累计用时: {:.3f}s.'.format(processor_index, i+1, end_time - start_time2, end_time - start_time1))
     result['intercept'] = img_intercept
     result['aod'] = img_aod
     result['t'] = img_t
@@ -373,21 +374,21 @@ def gwr_predict(processor_index, num_processor, matrix_xt_gwr, matrix_x_gwr, mat
     result['dem'] = img_dem
     result['ndvi'] = img_ndvi
     result['local_r'] = img_local_r
-    print('Processor {}\'s work has been finished!'.format(processor_index))
+    print('进程 {} 计算完成!'.format(processor_index))
     return result
 
 
 def dispose(matrix_xt_dis, matrix_x_dis, matrix_y_dis):
     results = []
 
-    print('Multiprocessing starts!')
+    print('多进程计算开始部署! 请稍候...')
     num_pro = int(0.9 * mp.cpu_count())
     pool = mp.Pool()
     for _iter in range(num_pro):
         results.append(pool.apply_async(gwr_predict, args=(_iter, num_pro, matrix_xt_dis, matrix_x_dis, matrix_y_dis)))
     pool.close()
     pool.join()
-    print('Multiprocessing ends!')
+    print('多进程计算完成!')
     # gwr_predict(0, 1, matrix_xt_dis, matrix_x_dis, matrix_y_dis)
 
     global img_intercept, img_aod, img_t, img_p, img_ws, img_rh, img_dem, img_ndvi, proj_templete, geotrans_templete
@@ -427,7 +428,7 @@ def dispose(matrix_xt_dis, matrix_x_dis, matrix_y_dis):
     Grid.write_img('./result/local_r-' + date_str + '-' + utm_str + '.tif', img_local_r, proj_templete,
                    geotrans_templete, 'tif')
     print('GWR finished!')
-    print('PM2.5 calculation starts!')
+    print('PM2.5 预测开始! 请稍候...')
     data_prepared = dict()
     data_prepared['c_intercept'] = img_intercept
     data_prepared['c_aod'] = img_aod
@@ -459,7 +460,7 @@ def grid_calculation(data):
                  data['c_dem'] * data['dem'] + data['c_ndvi'] * data['ndvi']
     Grid.write_img('./result/pm25_predict-' + date_str + '-' + utm_str + '.tif',
                    img_result, data['proj'], data['geo'], 'tif')
-    print('PM2.5 calculation finished!')
+    print('PM2.5 预测完成! 栅格已输出!')
 
 
 if __name__ == '__main__':
@@ -480,9 +481,11 @@ if __name__ == '__main__':
     # print('被解释变量矩阵 Y: \n{}'.format(matrix_y))
 
     # 确定最佳带宽
+    print('赤池信息准则检验开始! 请稍候...')
+    global_aicc_list = aic_test(matrix_xt, matrix_x, matrix_y)
     aicc_list = aic_test_random()
     fig = plt.figure(figsize=(10, 6))
-    chart = np.arange(5, 21)
+    chart = np.arange(1, int(0.69*NUMBER))
     plt.rcParams['font.sans-serif'] = ['SimHei']
     plt.rcParams['axes.unicode_minus'] = False
     plt.plot(chart, aicc_list, c='red')
@@ -491,16 +494,21 @@ if __name__ == '__main__':
     plt.ylabel('AICc')
     plt.savefig('./result/aic-' + date_str + '-' + utm_str + '.png')
     # plt.show()
+    print('赤池信息准则检验完成!')
 
     # 输出模型拟合信息
+    print('模型拟合全局信息输出开始! 请稍候...')
     text_str += '\n不同的带宽数量对应的AICc\n'
-    for i in range(5, 21):
+    for i in range(1, int(0.69*NUMBER)):
         text_str += 'b_n: {}   AICc: {:.4f}\n'.format(i, aicc_list[i-5])
     text_str += '\n选定的带宽数量为 {}\n'.format(b_n_final)
     text_file = open(r'.\result\result-' + date_str + '-' + utm_str + '.txt', 'w')
     text_file.write(text_str)
     text_file.close()
+    print('模型拟合全局信息输出完成!')
 
     # 生成回归系数栅格图、预测值栅格图
+    print('模型拟合开始! 请稍候...')
     dispose(matrix_xt, matrix_x, matrix_y)
-    print('All works Finished!')
+    print('模型拟合完成!')
+    print('全部任务完成!')
