@@ -41,7 +41,7 @@
 
 ## 项目时间表
 
-### 数据获取  ![Progress](http://progressed.io/bar/90)
+### 数据获取  ![Progress](http://progressed.io/bar/75)
 + [x] 区域确定，出shapefile [全体]
 + [x] 监测站：pm2.5 [李/杨]
 + 陆地海洋卫星遥感数据获取
@@ -59,6 +59,7 @@
 + **AOD**
   + [x] 反演算法DB=> AOD，裁掉海洋，和AERONET进行回归分析和校正 [李]
   + [x] 海洋：通过GOCI的AOT产品结果，与陆地进行拼接 [孙/杨]
+  + [ ] AOD反演正确和精确性的验证
 + 空间全域插值气象数据T, P, 风速, (RH) 
   + [x] ArcGIS/QGIS批处理 [陈/杨]
 + 空间连接（陆地）
@@ -78,25 +79,43 @@ PM2.5 (地面站点 Monitored on the ground)
   * 回归（陆地）
     * 方法：Statictical [LR, **GWR**], Machine Learning [Random Forest, SVR…]
       * [ ] Multivariate Linear Regression (OLS) 基于最小二乘法的多元线性回归
+      
         * [x] ArcGIS分析
+      
         * [ ] Python Implementation (Working)
+      
         * [ ] 统计检验和分析
-      * [ ] 对于统计回归模型 [孙/陈]
-        * 数据预处理
-        * 线性回归需要分析整体模型的线性显著性（F test）
-        * 多重共线性检验
-        * 需要对变量进行回归关系的显著性检验（t test） 
+      
+          * 线性回归需要分析整体模型的线性显著性（F test）
+      
+          * 多重共线性检验
+          * 需要对变量进行回归关系的显著性检验（t test） 
+      
+      * [x] GWR模型回归分析
+        
+        * [x] Python实现
+          * 预测参数优化
+            * 痴池信息准则
+            * 适应性带宽
+          * 回归和预测
+            * 权重矩阵和数据矩阵
+            * 预测分析
+        
       * [ ] 对于机器学习回归模型
         - [ ] [标准化数据](https://docs.microsoft.com/en-us/azure/machine-learning/studio-module-reference/normalize-data)（有些模型要求这么做，另外就是放在统一尺度能够使算法更加高效
         - [ ] Random Forest [Python](https://towardsdatascience.com/random-forest-in-python-24d0893d51c0) (正在完成)
-  * [ ] 回归（海洋）[???]
-    * NDVI这项改为primary production，其余不变
+    
+  * [ ] 回归（海洋）
+    
+    * 海洋AOD有缺失情况，使用*Fast Interpolation*进行补全
+    * 海洋PM2.5是否需要另外的模型还需要讨论
 
-### 模型验证与预测  ![Progress](http://progressed.io/bar/5)
+### 模型验证与预测  ![Progress](http://progressed.io/bar/50)
 + [ ] 模型比较验证，主要对陆地的结果进行
 + [ ] 全地表覆盖的PM2.5计算
 
 ### 分析说明  ![Progress](http://progressed.io/bar/5)
-+ [ ] 时间序列下pm2.5的轨迹
-+ 分析中国的PM2.5是否对韩国产生影响
-  + [ ] 稍宽时间尺度下的中韩间隔式影响
+
+- [ ] 可视化风场
+- [ ] 分析中国的PM2.5是否对韩国产生影响
+  * 稍宽时间尺度下的中韩间隔式影响
