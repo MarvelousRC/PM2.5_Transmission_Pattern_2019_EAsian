@@ -119,3 +119,57 @@ PM2.5 (地面站点 Monitored on the ground)
 - [ ] 可视化风场
 - [ ] 分析中国的PM2.5是否对韩国产生影响
   * 稍宽时间尺度下的中韩间隔式影响
+
+
+
+
+
+
+
+## 后期任务分工
+
+后期（Aug 1st to Sept 15th) 主要任务包含了如下
+
+* #### AOD验证
+
+  * AOD数据融合和调整（岸洲）
+  * 借助已有的AERONET数据对AOD的反演结果进行评估（杨神 孙神）
+
+* #### PM2.5反演模型比较
+
+  * **MLR (OLS) 检验**（F线性检验，t变量检验，置信区间预计）	(陈)
+    * 已有Jupyter Notebook代码说明
+  * **GWR**的调整和出图 (孙指导，全体成员完成)
+    * 如果有需要调整的话
+  * 象元级的**机器学习模型**（不考虑地理学第一定律的模型）（陈）
+    * [SVR](https://scikit-learn.org/stable/modules/svm.html#svm-regression) (Supporting Vector Regressor), [RF](https://scikit-learn.org/stable/modules/ensemble.html#random-forests) (Random Forests) 和 [MLP](https://scikit-learn.org/stable/modules/neural_networks_supervised.html) (Multilayer Perceptron, Neural Network)（现已完成了拟合，还在写预测的部分）
+      * 使用 Sci-Kit Learn 提供的框架
+      * 适当引入[交叉验证](https://zhuanlan.zhihu.com/p/24825503)来取得更好的模型
+  * 对 OLS, RF, NN, GWR 等 PM2.5 反演模型进行**横向比较**（陈，孙）
+  * 讨论**改进空间**（全体成员）
+
+* #### 结果解读（全体开会讨论）
+
+  * 风场**可视化**（杨）
+    * 如何结合风场的信息来解读？
+  * 说明PM2.5场面数据（判读每一个时刻的PM2.5浓度大小的空间分布情况）
+    * 空间自相关性分析
+    * 热点分析 (Getis-Ord Gi*) （对栅格数据可行性？）[Link](http://desktop.arcgis.com/zh-cn/arcmap/10.3/tools/spatial-statistics-toolbox/h-how-hot-spot-analysis-getis-ord-gi-spatial-stati.htm)
+  * 分析PM2.5变化的趋势
+    * 判读
+    * 时间序列分析？[Link1](https://blog.csdn.net/qq_41518277/article/details/80288031) [Link2]https://www.datacamp.com/community/tutorials/time-series-analysis-tutorial) [Wikipedia](https://en.wikipedia.org/wiki/Time_series)
+      * 目前来看由于时间维度不够长，9个时间点似乎不足以进行时序分析
+      * 另外对于栅格数据而言，每一个空间点都会形成一个时间序列，如何建模说明？
+      * [ARIMA](https://en.wikipedia.org/wiki/Autoregressive_integrated_moving_average)
+
+* #### 结果呈现
+
+  * 文档
+    * 参考文献整理和归档
+      * 生成项目参考文献的列表
+    * **项目说明报告和结果报告**
+      * 参照论文的规格
+    * 实验报告
+      * 主要是每一个Part的README
+  * PPT
+    * 从项目说明和结果分析报告中提取并说明
