@@ -157,7 +157,7 @@ PM2.5 (地面站点 Monitored on the ground)
     * 热点分析 (Getis-Ord Gi*) （对栅格数据可行性？）[Link](http://desktop.arcgis.com/zh-cn/arcmap/10.3/tools/spatial-statistics-toolbox/h-how-hot-spot-analysis-getis-ord-gi-spatial-stati.htm)
   * 分析PM2.5变化的趋势
     * 判读
-    * 时间序列分析？[Link1](https://blog.csdn.net/qq_41518277/article/details/80288031) [Link2]https://www.datacamp.com/community/tutorials/time-series-analysis-tutorial) [Wikipedia](https://en.wikipedia.org/wiki/Time_series)
+    * 时间序列分析？[Link1](https://blog.csdn.net/qq_41518277/article/details/80288031) [Link2](https://www.datacamp.com/community/tutorials/time-series-analysis-tutorial) [Wikipedia](https://en.wikipedia.org/wiki/Time_series)
       * 目前来看由于时间维度不够长，9个时间点似乎不足以进行时序分析
       * 另外对于栅格数据而言，每一个空间点都会形成一个时间序列，如何建模说明？
       * [ARIMA](https://en.wikipedia.org/wiki/Autoregressive_integrated_moving_average)
