@@ -1,0 +1,206 @@
+Running PM 2.5 Deduction Program on 14-1 (date-hour).
+------ SVR ------
+Best parameters set found on development set:
+
+{'C': 1000, 'epsilon': 0.5, 'gamma': 0.001, 'kernel': 'rbf'}
+
+
+SVM Model Score: 0.7643608396016222
+------ MLP ------
+Best parameters set found on development set:
+
+{'activation': 'relu', 'alpha': 0.0001, 'learning_rate': 'constant', 'learning_rate_init': 0.01, 'momentum': 0.9, 'solver': 'sgd'}
+
+
+MLP Model Score: 0.7853277342454376
+------ Random Forests ------
+Best parameters set found on development set:
+
+{'bootstrap': True, 'max_depth': 110, 'min_samples_leaf': 1, 'min_samples_split': 2, 'n_estimators': 100}
+
+
+Random Forests Model Score: 0.6930383760745136
+Task of Running PM 2.5 Deduction Program on 14-1 (date-hour) is finished.Running PM 2.5 Deduction Program on 14-4 (date-hour).
+------ SVR ------
+Best parameters set found on development set:
+
+{'C': 1000, 'epsilon': 0.3, 'gamma': 0.001, 'kernel': 'rbf'}
+
+
+SVM Model Score: 0.4022660564903455
+------ MLP ------
+Best parameters set found on development set:
+
+{'activation': 'relu', 'alpha': 0.001, 'learning_rate': 'constant', 'learning_rate_init': 0.01, 'momentum': 0.9, 'solver': 'sgd'}
+
+
+MLP Model Score: 0.5358015529592717
+------ Random Forests ------
+Best parameters set found on development set:
+
+{'bootstrap': True, 'max_depth': 60, 'min_samples_leaf': 1, 'min_samples_split': 2, 'n_estimators': 100}
+
+
+Random Forests Model Score: 0.6853027529719213
+Task of Running PM 2.5 Deduction Program on 14-4 (date-hour) is finished.
+Running PM 2.5 Deduction Program on 14-7 (date-hour).
+------ SVR ------
+Best parameters set found on development set:
+
+{'C': 1000, 'epsilon': 0.5, 'gamma': 0.001, 'kernel': 'rbf'}
+
+
+SVM Model Score: 0.3559186699088237
+------ MLP ------
+Best parameters set found on development set:
+
+{'activation': 'logistic', 'alpha': 0.001, 'solver': 'lbfgs'}
+
+
+MLP Model Score: 0.6921955004563851
+------ Random Forests ------
+Best parameters set found on development set:
+
+{'bootstrap': True, 'max_depth': 110, 'min_samples_leaf': 1, 'min_samples_split': 2, 'n_estimators': 100}
+
+
+Random Forests Model Score: 0.7277826946878221
+Task of Running PM 2.5 Deduction Program on 14-7 (date-hour) is finished.
+Running PM 2.5 Deduction Program on 15-1 (date-hour).
+------ SVR ------
+Best parameters set found on development set:
+
+{'C': 1000, 'epsilon': 0.3, 'gamma': 0.001, 'kernel': 'rbf'}
+
+
+SVM Model Score: 0.3127155295781143
+------ MLP ------
+Best parameters set found on development set:
+
+{'activation': 'relu', 'alpha': 0.0001, 'learning_rate_init': 0.001, 'solver': 'adam'}
+
+
+MLP Model Score: 0.5540211555847201
+------ Random Forests ------
+Best parameters set found on development set:
+
+{'bootstrap': True, 'max_depth': 85, 'min_samples_leaf': 3, 'min_samples_split': 2, 'n_estimators': 100}
+
+
+Random Forests Model Score: 0.7118002664929918
+Task of Running PM 2.5 Deduction Program on 15-1 (date-hour) is finished.
+Running PM 2.5 Deduction Program on 15-4 (date-hour).
+------ SVR ------
+Best parameters set found on development set:
+
+{'C': 1000, 'epsilon': 0.3, 'gamma': 0.001, 'kernel': 'rbf'}
+
+
+SVM Model Score: 0.43850715619033326
+------ MLP ------
+Best parameters set found on development set:
+
+{'activation': 'relu', 'alpha': 0.0001, 'learning_rate_init': 0.001, 'solver': 'adam'}
+
+
+MLP Model Score: 0.5462841154191238
+------ Random Forests ------
+Best parameters set found on development set:
+
+{'bootstrap': True, 'max_depth': 35, 'min_samples_leaf': 3, 'min_samples_split': 5, 'n_estimators': 100}
+
+
+Random Forests Model Score: 0.7068553897642795
+Task of Running PM 2.5 Deduction Program on 15-4 (date-hour) is finished.
+Running PM 2.5 Deduction Program on 15-7 (date-hour).
+------ SVR ------
+Best parameters set found on development set:
+
+{'C': 1000, 'epsilon': 0.3, 'gamma': 0.001, 'kernel': 'rbf'}
+
+
+SVM Model Score: 0.5239288789822991
+------ MLP ------
+Best parameters set found on development set:
+
+{'activation': 'relu', 'alpha': 0.001, 'learning_rate_init': 0.001, 'solver': 'adam'}
+
+
+MLP Model Score: 0.6292625130023479
+------ Random Forests ------
+Best parameters set found on development set:
+
+{'bootstrap': True, 'max_depth': 85, 'min_samples_leaf': 1, 'min_samples_split': 5, 'n_estimators': 100}
+
+
+Random Forests Model Score: 0.6784461571950813
+Task of Running PM 2.5 Deduction Program on 15-7 (date-hour) is finished.
+Running PM 2.5 Deduction Program on 16-1 (date-hour).
+------ SVR ------
+Best parameters set found on development set:
+
+{'C': 1000, 'epsilon': 0.5, 'gamma': 0.001, 'kernel': 'rbf'}
+
+
+SVM Model Score: 0.40315856977441633
+------ MLP ------
+Best parameters set found on development set:
+
+{'activation': 'relu', 'alpha': 0.0001, 'learning_rate_init': 0.001, 'solver': 'adam'}
+
+
+MLP Model Score: 0.5732612728503883
+------ Random Forests ------
+Best parameters set found on development set:
+
+{'bootstrap': True, 'max_depth': 60, 'min_samples_leaf': 1, 'min_samples_split': 2, 'n_estimators': 200}
+
+
+Random Forests Model Score: 0.5526126601222234
+Task of Running PM 2.5 Deduction Program on 16-1 (date-hour) is finished.
+Running PM 2.5 Deduction Program on 16-4 (date-hour).
+------ SVR ------
+Best parameters set found on development set:
+
+{'C': 1000, 'epsilon': 0.5, 'gamma': 0.001, 'kernel': 'rbf'}
+
+
+SVM Model Score: 0.2656137775471177
+------ MLP ------
+Best parameters set found on development set:
+
+{'activation': 'tanh', 'alpha': 0.0001, 'learning_rate_init': 0.01, 'solver': 'adam'}
+
+
+MLP Model Score: 0.6384474070460472
+------ Random Forests ------
+Best parameters set found on development set:
+
+{'bootstrap': True, 'max_depth': 60, 'min_samples_leaf': 1, 'min_samples_split': 2, 'n_estimators': 200}
+
+
+Random Forests Model Score: 0.4578576170923269
+Task of Running PM 2.5 Deduction Program on 16-4 (date-hour) is finished.
+Running PM 2.5 Deduction Program on 16-7 (date-hour).
+------ SVR ------
+Best parameters set found on development set:
+
+{'C': 1000, 'epsilon': 0.1, 'gamma': 0.001, 'kernel': 'rbf'}
+
+
+SVM Model Score: 0.5510134105701894
+------ MLP ------
+Best parameters set found on development set:
+
+{'activation': 'relu', 'alpha': 0.0001, 'learning_rate_init': 0.001, 'solver': 'adam'}
+
+
+MLP Model Score: 0.6055008558017578
+------ Random Forests ------
+Best parameters set found on development set:
+
+{'bootstrap': True, 'max_depth': 85, 'min_samples_leaf': 1, 'min_samples_split': 2, 'n_estimators': 100}
+
+
+Random Forests Model Score: 0.5942056239972062
+Task of Running PM 2.5 Deduction Program on 16-7 (date-hour) is finished.
