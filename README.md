@@ -14,9 +14,11 @@
 2. 基础数据收集和预处理：[https://github.com/MarvelousRC/FactCheckSKoreanAirPollution/blob/master/基础数据的获取和处理.md](https://github.com/MarvelousRC/FactCheckSKoreanAirPollution/blob/master/基础数据的获取和处理.md)
    - 气象数据预处理：[LINK](https://github.com/MarvelousRC/FactCheckSKoreanAirPollution/blob/master/基础数据的获取和处理.md#三气象输数据的预处理)
    - AOD反演原理和验证：[LINK](https://github.com/MarvelousRC/FactCheckSKoreanAirPollution/blob/master/基础数据的获取和处理.md#四光学气溶胶厚度aod的反演)
-3. 多元线性回归、建模探索：https://github.com/MarvelousRC/FactCheckSKoreanAirPollution/blob/master/ML/MLR.ipynb （Jupyter Notebook文档报告）
+3. 多元线性回归、建模探索：
+   * https://github.com/MarvelousRC/FactCheckSKoreanAirPollution/blob/master/ML/MLR.ipynb （Jupyter Notebook文档报告）
+   * https://github.com/MarvelousRC/FactCheckSKoreanAirPollution/blob/master/ML/Jupyter2Markdown/MLR/MLR.md （适合移动阅读的格式）
 4. GWR模型实现：https://github.com/MarvelousRC/FactCheckSKoreanAirPollution/blob/master/GTWR/advanced_gtwr.py
-5. 机器学习模型实现：https://github.com/MarvelousRC/FactCheckSKoreanAirPollution/blob/master/ML/PM25_Machine_Learning_Experiment.ipynb     （Jupyter Notebook文档报告）
+5. 机器学习模型实现：https://github.com/MarvelousRC/FactCheckSKoreanAirPollution/blob/master/ML/PM25_Machine_Learning_Experiment.ipynb     （Jupyter Notebook文档报告）https://github.com/MarvelousRC/FactCheckSKoreanAirPollution/blob/master/ML/Jupyter2Markdown/PM25_Machine_Learning_Experiment/PM25_Machine_Learning_Experiment.md （适合移动阅读的格式）
    - 数据预处理、参数优化以及交叉验证说明
    - 预测分析和图示
 6. 结果说明（见报告）
@@ -58,4 +60,4 @@
 
 故在本研究中，我们选取14日-16日的气象、空气质量等数据，对该时间范围内的中韩空气质量的传导关系进行验证。
 
-* * * 
+* * *
