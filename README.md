@@ -16,7 +16,7 @@
    - AOD反演原理和验证：[LINK](https://github.com/MarvelousRC/FactCheckSKoreanAirPollution/blob/master/基础数据的获取和处理.md#四光学气溶胶厚度aod的反演)
 3. 多元线性回归、建模探索：https://github.com/MarvelousRC/FactCheckSKoreanAirPollution/blob/master/ML/MLR.ipynb （Jupyter Notebook文档报告）
 4. GWR模型实现：https://github.com/MarvelousRC/FactCheckSKoreanAirPollution/blob/master/GTWR/advanced_gtwr.py
-5. 机器学习模型实现：https://github.com/MarvelousRC/FactCheckSKoreanAirPollution/blob/master/ML/PM25_Machine_Learning_Experiment.ipynb（Jupyter Notebook文档报告）
+5. 机器学习模型实现：https://github.com/MarvelousRC/FactCheckSKoreanAirPollution/blob/master/ML/PM25_Machine_Learning_Experiment.ipynb     （Jupyter Notebook文档报告）
    - 数据预处理、参数优化以及交叉验证说明
    - 预测分析和图示
 6. 结果说明（见报告）
