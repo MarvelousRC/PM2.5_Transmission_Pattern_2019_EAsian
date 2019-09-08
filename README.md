@@ -8,22 +8,24 @@
 
 项目组成员：陈玮烨 孙克染 李岸洲 杨清杰
 
-## 项目构成
-
-![3S实现流程](assets/3S实现流程.png)
-
 ### 站内导航快速链接
 
 1. 项目主页：https://github.com/MarvelousRC/FactCheckSKoreanAirPollution
 2. 基础数据收集和预处理：[https://github.com/MarvelousRC/FactCheckSKoreanAirPollution/blob/master/基础数据的获取和处理.md](https://github.com/MarvelousRC/FactCheckSKoreanAirPollution/blob/master/基础数据的获取和处理.md)
-   * 气象数据预处理：[LINK](https://github.com/MarvelousRC/FactCheckSKoreanAirPollution/blob/master/基础数据的获取和处理.md#三气象输数据的预处理)
-   * AOD反演原理和验证：[LINK](https://github.com/MarvelousRC/FactCheckSKoreanAirPollution/blob/master/基础数据的获取和处理.md#四光学气溶胶厚度aod的反演)
+   - 气象数据预处理：[LINK](https://github.com/MarvelousRC/FactCheckSKoreanAirPollution/blob/master/基础数据的获取和处理.md#三气象输数据的预处理)
+   - AOD反演原理和验证：[LINK](https://github.com/MarvelousRC/FactCheckSKoreanAirPollution/blob/master/基础数据的获取和处理.md#四光学气溶胶厚度aod的反演)
 3. 多元线性回归、建模探索：https://github.com/MarvelousRC/FactCheckSKoreanAirPollution/blob/master/ML/MLR.ipynb （Jupyter Notebook文档报告）
 4. GWR模型实现：https://github.com/MarvelousRC/FactCheckSKoreanAirPollution/blob/master/GTWR/advanced_gtwr.py
 5. 机器学习模型实现：https://github.com/MarvelousRC/FactCheckSKoreanAirPollution/blob/master/ML/PM25_Machine_Learning_Experiment.ipynb（Jupyter Notebook文档报告）
-   * 数据预处理、参数优化以及交叉验证说明
-   * 预测分析和图示
+   - 数据预处理、参数优化以及交叉验证说明
+   - 预测分析和图示
 6. 结果说明（见报告）
+
+## 项目构成
+
+![3S实现流程](assets/3S实现流程.png)
+
+
 
 ## 项目研究范围
 
